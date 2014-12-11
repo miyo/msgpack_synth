@@ -62,13 +62,38 @@ public class SimpleParser {
 		return len;
 	}
 
-	public void read_data(){
+	private void read_data(){
 		
 		int d = (int)read_port.data[0];
+		
 		if(d < 127 && d >= -31){
 			// positive imm.
 			return;
 		}
+
+		if((d & 0xF0) == 0x80){
+			// fixmap
+			op_stack.data[0] = MAP_OP; // next, start map operation
+			len_stack.data[0] = d & 0x0F;
+			return;
+		}
+		
+		if((d & 0xF0) == 0x90){
+			// fixarray	1001xxxx	0x90 - 0x9f
+			op_stack.data[0] = ARRAY_OP;
+			len_stack.data[0] = d & 0x0F;
+			return;
+		}
+		
+		if((d & 0xE0) == 0xA0){
+			// fixstr	101xxxxx	0xa0 - 0xbf
+			int len = d & 0x1F;
+			for(int i = 0; i < len; i++){
+				d = read_port.data[0]; // consume specified length
+			}
+		}
+
+		
 		switch(d){
 		case MsgPack_NIL:
 			return;
@@ -163,35 +188,27 @@ public class SimpleParser {
 			len_stack.data[0] = get_length(4);
 			return;
 		}
-		}
-
-		if((d & 0xF0) == 0x80){
-			// fixmap
-			op_stack.data[0] = MAP_OP; // next, start map operation
-			len_stack.data[0] = d & 0x0F;
+		default: // not should be reached
 			return;
 		}
-		
-		if((d & 0xF0) == 0x90){
-			// fixarray	1001xxxx	0x90 - 0x9f
-			op_stack.data[0] = ARRAY_OP;
-			len_stack.data[0] = d & 0x0F;
-			return;
-		}
-		
-		if((d & 0xE0) == 0xA0){
-			// fixstr	101xxxxx	0xa0 - 0xbf
-			int len = d & 0x1F;
-			for(int i = 0; i < len; i++){
-				d = read_port.data[0]; // consume specified length
-			}
-		}
-		
-		
-
-		
 		
 	}
 	
+	public void parse(){
+		long num = 1L;
+		while(num > 0){
+			read_data();
+			num = 0L;
+			if(op_stack.hasItem){
+				int op = op_stack.data[0]; // pop
+				int len = len_stack.data[0]; // pop
+				if(op == ARRAY_OP){
+					num = (long)len; // N
+				}else{
+					num = ((long)len) << 1; // N * 2
+				}
+			}
+		}
+	}
 
 }
