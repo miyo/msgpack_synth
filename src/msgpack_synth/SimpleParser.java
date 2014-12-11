@@ -198,14 +198,16 @@ public class SimpleParser {
 		long num = 1L;
 		while(num > 0){
 			read_data();
-			num = 0L;
-			if(op_stack.hasItem){
-				int op = op_stack.data[0]; // pop
-				int len = len_stack.data[0]; // pop
-				if(op == ARRAY_OP){
-					num = (long)len; // N
-				}else{
-					num = ((long)len) << 1; // N * 2
+			num--;
+			if(num == 0){
+				if(op_stack.hasItem){
+					int op = op_stack.data[0]; // pop
+					int len = len_stack.data[0]; // pop
+					if(op == ARRAY_OP){
+						num = (long)len; // N
+					}else{
+						num = ((long)len) << 1; // N * 2
+					}
 				}
 			}
 		}
