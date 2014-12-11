@@ -6,15 +6,15 @@ import synthesijer.hdl.HDLPrimitiveType;
 
 public class Fifo8 extends HDLModule{
 	
-	public byte[] data;
+	public byte dequeue(){
+		return 0;
+	}
 		
 	public Fifo8(String... args){
 		super("fifo8", "clk", "reset");
-		newPort("data_address", DIR.IN,  HDLPrimitiveType.genSignedType(8));
-		newPort("data_din",     DIR.IN,  HDLPrimitiveType.genSignedType(8, "WIDTH-1", "0"));
-		newPort("data_dout",    DIR.OUT, HDLPrimitiveType.genSignedType(8, "WIDTH-1", "0"));
-		newPort("data_we",      DIR.IN,  HDLPrimitiveType.genBitType());
-		newPort("data_oe",      DIR.IN,  HDLPrimitiveType.genBitType());
+		newPort("dequeue_req",  DIR.IN,  HDLPrimitiveType.genBitType());
+		newPort("dequeue_busy", DIR.OUT,  HDLPrimitiveType.genBitType());
+		newPort("dequeue_return", DIR.OUT,  HDLPrimitiveType.genSignedType(8));
 	}
 
 }

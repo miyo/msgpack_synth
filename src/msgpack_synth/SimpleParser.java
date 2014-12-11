@@ -50,21 +50,24 @@ public class SimpleParser {
 	
 	private void consume_data(int type, int num){
 		for(int i = 0; i < num; i++){
-			int d = read_port.data[0]; // consume
+			//int d = read_port.data[0]; // consume
+			int d = read_port.dequeue();
 		}
 	}
 
 	private int get_length(int num){
 		int len = 0;
 		for(int i = 0; i < num; i++){
-			len = (len << 8) + (((int)read_port.data[0]) & 0x000000FF);
+			//len = (len << 8) + (((int)read_port.data[0]) & 0x000000FF);
+			len = (len << 8) + (((int)read_port.dequeue()) & 0x000000FF);
 		}
 		return len;
 	}
 
 	private void read_data(){
 		
-		int d = (int)read_port.data[0];
+		//int d = (int)read_port.data[0];
+		int d = (int)read_port.dequeue();
 		
 		if(d < 127 && d >= -31){
 			// "d" is consume as immediate value
@@ -73,15 +76,15 @@ public class SimpleParser {
 
 		if((d & 0xF0) == 0x80){
 			// fixmap
-			op_stack.data[0] = MAP_OP; // next, start map operation
-			len_stack.data[0] = d & 0x0F;
+			op_stack.push(MAP_OP); // next, start map operation
+			len_stack.push(d & 0x0F);
 			return;
 		}
 		
 		if((d & 0xF0) == 0x90){
 			// fixarray	1001xxxx	0x90 - 0x9f
-			op_stack.data[0] = ARRAY_OP;
-			len_stack.data[0] = d & 0x0F;
+			op_stack.push(ARRAY_OP);
+			len_stack.push(d & 0x0F);
 			return;
 		}
 		
@@ -89,7 +92,8 @@ public class SimpleParser {
 			// fixstr	101xxxxx	0xa0 - 0xbf
 			int len = d & 0x1F;
 			for(int i = 0; i < len; i++){
-				d = read_port.data[0]; // consume specified length
+				//d = read_port.data[0]; // consume specified length
+				d = read_port.dequeue(); // consume specified length
 			}
 		}
 
@@ -169,23 +173,23 @@ public class SimpleParser {
 			consume_data(d, get_length(4));
 			return;
 		case MsgPack_array_16:{
-			op_stack.data[0] = ARRAY_OP; // next, start map operation
-			len_stack.data[0] = get_length(2);
+			op_stack.push(ARRAY_OP); // next, start map operation
+			len_stack.push(get_length(2));
 			return;
 		}			
 		case MsgPack_array_32:{
-			op_stack.data[0] = ARRAY_OP; // next, start map operation
-			len_stack.data[0] = get_length(4);
+			op_stack.push(ARRAY_OP); // next, start map operation
+			len_stack.push(get_length(4));
 			return;
 		}
 		case MsgPack_map_16:{
-			op_stack.data[0] = MAP_OP; // next, start map operation
-			len_stack.data[0] = get_length(2);
+			op_stack.push(MAP_OP); // next, start map operation
+			len_stack.push(get_length(2));
 			return;
 		}
 		case MsgPack_map_32:{
-			op_stack.data[0] = MAP_OP; // next, start map operation
-			len_stack.data[0] = get_length(4);
+			op_stack.push(MAP_OP); // next, start map operation
+			len_stack.push(get_length(4));
 			return;
 		}
 		default: // not should be reached
@@ -201,8 +205,8 @@ public class SimpleParser {
 			num--;
 			if(num == 0){
 				if(op_stack.hasItem){
-					int op = op_stack.data[0]; // pop
-					int len = len_stack.data[0]; // pop
+					int op = op_stack.pop(); // pop
+					int len = len_stack.pop(); // pop
 					if(op == ARRAY_OP){
 						num = (long)len; // N
 					}else{

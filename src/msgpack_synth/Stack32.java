@@ -6,16 +6,27 @@ import synthesijer.hdl.HDLPrimitiveType;
 
 public class Stack32 extends HDLModule{
 	
-	public int[] data;
+	public void push(int n){
+		
+	}
+	
+	public int pop(){
+		return 0;
+	}
+
 	public boolean hasItem;
 		
 	public Stack32(String... args){
-		super("stack8", "clk", "reset");
-		newPort("data_address", DIR.IN,  HDLPrimitiveType.genSignedType(32));
-		newPort("data_din",     DIR.IN,  HDLPrimitiveType.genSignedType(32, "WIDTH-1", "0"));
-		newPort("data_dout",    DIR.OUT, HDLPrimitiveType.genSignedType(32, "WIDTH-1", "0"));
-		newPort("data_we",      DIR.IN,  HDLPrimitiveType.genBitType());
-		newPort("data_oe",      DIR.IN,  HDLPrimitiveType.genBitType());
+		super("stack32", "clk", "reset");
+		
+		newPort("push_req",  DIR.IN,  HDLPrimitiveType.genSignedType(32));
+		newPort("push_n",    DIR.IN,  HDLPrimitiveType.genSignedType(32, "WIDTH-1", "0"));
+		newPort("push_busy", DIR.OUT, HDLPrimitiveType.genBitType());
+		
+		newPort("pop_req",    DIR.IN,  HDLPrimitiveType.genSignedType(32));
+		newPort("pop_return", DIR.OUT,  HDLPrimitiveType.genSignedType(32, "WIDTH-1", "0"));
+		newPort("pop_busy",   DIR.OUT, HDLPrimitiveType.genBitType());
+
 		newPort("hasItem",      DIR.OUT, HDLPrimitiveType.genBitType());
 	}
 
