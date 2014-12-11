@@ -67,7 +67,7 @@ public class SimpleParser {
 		int d = (int)read_port.data[0];
 		
 		if(d < 127 && d >= -31){
-			// positive imm.
+			// "d" is consume as immediate value
 			return;
 		}
 
